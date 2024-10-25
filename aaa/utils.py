@@ -2,10 +2,10 @@ import requests
 from lxml import html
 from googletrans import Translator
 import csv
-
+import re
 
 def kompass_info():
-    url = "https://firmeneintrag.creditreform.de/14482/2012045860/GERMAN_DEEP_TECH_INNOVATIONS_AG"
+    url = "https://firmeneintrag.creditreform.de/01662/3070620317/FIDES_DIGITAL_ASSETS_FOUNDATION_GMBH"
 
     payload = {}
     headers = {
@@ -33,19 +33,18 @@ def kompass_info():
 def get_content(web_content, xpath):
     tree = html.fromstring(web_content.content)
 
-    # Use XPath to extract data (Example: Get all headings <h1>)
+    # Use XPath to extract data
     contents = tree.xpath(xpath)
-    print(contents)
-    for i in contents:
-        print(i.text_content())
-    # Print the extracted headings
+
+    # Extract text content if available and return as a list
+    result = []
     for content in contents:
         if hasattr(content, 'text_content'):
-            # print(content.text_content())
-            yield content.text_content().strip()
+            result.append(content.text_content().strip())
         else:
-            yield content
+            result.append(content)
 
+    return result
 
 def get_all_rows(web_content, xpath):
     tree = html.fromstring(web_content.content)
@@ -87,7 +86,7 @@ def create_csv_with_headers(filename, headers, **kwargs):
             writer.writeheader()
 
         # Initialize the row with None for each header and update with provided kwargs
-        row_data = {header: kwargs.get(header, None) for header in headers}
+        row_data = {header: kwargs.get(header, 'N/A') for header in headers}
         writer.writerow(row_data)
 
     print(f"Data added to '{filename}' successfully!")
@@ -95,4 +94,18 @@ def create_csv_with_headers(filename, headers, **kwargs):
 
 
 
+def extract_date(text):
+    # Define a regular expression pattern for dates like "July 13, 2016"
+    date_pattern = r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b'
 
+    # Search for the pattern in the text
+    dates = re.findall(date_pattern, text)
+
+    return dates
+
+
+
+def kompass_info_2():
+    url = "https://www.northdata.com/Fides%20Digital%20Assets%20Foundation%20GmbH,%20Mei%C3%9Fen/Amtsgericht%20Dresden%20HRB%2043519"
+
+    return requests.request("GET", url)

@@ -4,7 +4,7 @@ import pandas as pd
 router = APIRouter()
 
 # Load the CSV file into a DataFrame
-df = pd.read_csv('data.csv')
+df = pd.read_csv('scraped_info.csv')
 
 
 @router.get("/search/", response_model=List[dict])
